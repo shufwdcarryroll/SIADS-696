@@ -13,112 +13,114 @@ The goal of the project is to identify different market volatility regimes from 
 * Lina Al-Rawahi
 * Yu Fang
 
-## Project Overview
+# SIADS 696 – Milestone II
 
-Financial markets often move through different environments, such as calm, transitional, and stressed periods. These regimes are not directly observed, so the first part of this project uses unsupervised learning to identify them from market data.
+## Market Regimes and Equity Volatility
 
-We then use the estimated regime information as an additional feature in a supervised learning model to test whether it improves forecasts of future realized volatility.
+This repository contains our Milestone II project for SIADS 696 in the University of Michigan MADS program.
 
-The main research question is:
+The project looks at whether different market volatility regimes can be identified from historical S&P 500 and VIX data, and whether those regimes are useful for forecasting future realized volatility.
 
-> Can market regimes be identified from S&P 500 and VIX data without predefined labels, and does including this information improve short-term volatility forecasts?
+## Team
+
+- Shub M
+- Lina Al-Rawahi
+- Yu Fang
+
+## Project Idea
+
+Financial markets do not behave the same way all the time. There are relatively calm periods, periods where volatility starts to increase, and periods of significant market stress.
+
+Our project tries to identify these different market environments using an unsupervised learning model. We then use the regime information as an input to a supervised model and test whether it improves short-term volatility forecasts.
+
+Our main research question is:
+
+> Can latent market regimes identified from historical market behavior improve the prediction of future realized volatility?
 
 ## Data
 
-The analysis uses daily market data from **January 2000 through December 2025**.
+We are using daily market data from 2000 through 2025.
 
 The main datasets are:
 
-* S&P 500 daily price and volume data
-* CBOE VIX daily data
-* A merged dataset aligned by trading date
+- S&P 500 daily price and volume data
+- CBOE VIX daily data
+- A merged dataset aligned by trading date
 
-The final merged dataset contains approximately **6,500 daily observations**.
+The merged dataset contains roughly 6,500 daily observations.
 
-## Methodology
+We also create features such as:
 
-### Part A — Supervised Learning
+- 5-, 10-, and 20-day realized volatility
+- VIX level and changes in VIX
+- rolling skewness
+- rolling kurtosis
 
-The supervised portion predicts forward realized volatility using market features such as:
+## Part B – Unsupervised Learning
 
-* 5-, 10-, and 20-day realized volatility
-* VIX level
-* Skewness
-* Kurtosis
-* Estimated market regime probabilities
+We start with the unsupervised part of the project.
 
-Models with regime information are compared against models using only standard market indicators.
+The main model is a Gaussian Hidden Markov Model (HMM), which is used to identify latent market regimes from the market features.
 
-Performance is evaluated using **RMSE and MAE**, along with a simple volatility persistence baseline.
+We currently interpret the states as broadly representing:
 
-### Part B — Unsupervised Learning
+- Calm
+- Transition
+- Stressed
 
-The unsupervised portion identifies market regimes using:
+The labels are assigned after looking at the characteristics of each state, including VIX levels, realized volatility, and market behavior during each regime.
 
-* **Gaussian Hidden Markov Model (HMM)**
-* **K-means clustering** as a simpler comparison
+We also use K-means clustering as a simpler comparison model. Unlike the HMM, K-means does not explicitly account for the time dependence of market regimes.
 
-The HMM captures both the characteristics of each regime and the probability of moving between regimes.
+For the HMM analysis, we look at:
 
-The resulting states are interpreted using measures such as VIX level, realized volatility, persistence, and behavior during known periods of market stress.
+- regime characteristics
+- regime persistence
+- transition probabilities
+- behavior during major market stress periods
+- how the HMM regimes compare with K-means clusters
 
-## Evaluation
+## Part A – Supervised Learning
 
-The project focuses on out-of-sample performance using a time-based training and testing approach.
+The supervised part of the project focuses on forecasting future realized volatility.
 
-The main comparison is whether adding regime information improves volatility forecasts relative to:
+The idea is to first build models using standard market features and then test whether adding the regime information from Part B improves the forecasts.
 
-1. A simple persistence baseline
-2. Models using standard market variables without regime information
+Inputs include variables such as:
 
-We also examine regime persistence, transition probabilities, clustering quality, and behavior during major stress periods such as the 2008 financial crisis and the 2020 COVID market shock.
+- recent realized volatility
+- VIX
+- skewness
+- kurtosis
+- estimated regime information from the HMM
 
-## Visualizations
+Forecast performance will be compared using RMSE and MAE.
 
-Key visualizations include:
+We will also compare the models against a simple persistence baseline, where future volatility is assumed to be similar to recent realized volatility.
 
-* S&P 500 performance colored by estimated market regime
-* Regime transition probability heatmap
-* Predicted versus actual volatility
-* Forecast error comparisons
-* Market characteristics across regimes
+## Project Workflow
 
-## Tools
+The overall workflow is:
 
-The project is implemented in Python using libraries including:
-
-* pandas
-* NumPy
-* scikit-learn
-* XGBoost
-* hmmlearn
-* matplotlib
-* yfinance
+1. Collect and clean S&P 500 and VIX data
+2. Create rolling market and volatility features
+3. Use an HMM to identify market regimes
+4. Compare the HMM regimes with K-means
+5. Use regime information as an additional input to the supervised model
+6. Compare volatility forecasts with and without regime information
 
 ## Repository Structure
 
 ```text
-├── data/               # Raw and processed market data
-├── notebooks/          # Exploratory analysis and modeling
-├── src/                # Reusable analysis and modeling code
-├── figures/            # Final charts and visualizations
-├── report/             # Project proposal and final report
+SIADS-696/
+│
+├── data/
+│   └── market datasets used in the analysis
+│
+├── notebooks/
+│   └── data analysis and modeling notebooks
+│
+├── figures/
+│   └── charts and model outputs
+│
 └── README.md
-```
-
-## Course Context
-
-SIADS 696 Milestone II focuses on applying methods learned throughout the MADS program to a larger data science project.
-
-This project combines:
-
-* supervised learning
-* unsupervised learning
-* feature engineering
-* model evaluation
-* visualization
-* communication of data science results
-
-## Status
-
-Work in progress as part of the Fall 2026 SIADS 696 Milestone II project.
